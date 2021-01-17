@@ -6,8 +6,10 @@ __pycache__/
 *.ipynb
 .ipynb_checkpoints
 _build
+bin/
 build/
 dist/
+obj/
 
 
 *.pkl
