@@ -101,7 +101,9 @@ class BinanceCollector:
 
         def _adj(file_path: Path):
             df = pd.read_csv(file_path)
-            df = df.loc[:, ["date", "open", "high", "low", "close", "volume", "takecount", "takebuyvolume", "factor"]]
+            df = df.loc[:, [
+                "date", "open", "high", "low", "close", "volume", "quotevolume", "takecount", "takebuyvolume", "takebuyquotevolume", "factor"
+            ]]
             df.sort_values("date", inplace=True)
             df = df.set_index("date")
             df = df.loc[df.first_valid_index():]
