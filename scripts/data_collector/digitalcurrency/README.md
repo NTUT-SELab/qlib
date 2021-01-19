@@ -1,7 +1,7 @@
 # Collect Data From Binance Exchange
 
 ## Requirements
-
+Install [.Net 5](https://dotnet.microsoft.com/download/dotnet/5.0)
 ```bash
 pip install -r requirements.txt
 ```
@@ -9,7 +9,15 @@ pip install -r requirements.txt
 ## Collector Data
 
 ### Download Data
-> Todo
+```
+-s, --symbol        Required. BTCUSDT
+-S, --start-time              20/01/2020
+-E, --end-time                20/02/2020
+-o, --output                  csv output path
+```
+```
+dotnet run -p .\Crawler\Crawler.csproj -- -s BTCUSDT -S 01/16/2021 -E 01/17/2021 -o ~/.qlib/digital_currency_data/source
+```
 
 ### Sort data and Normalize data
 ```bash
