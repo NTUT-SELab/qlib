@@ -1,7 +1,7 @@
 ﻿using Binance.Net;
 using Binance.Net.Enums;
+using Binance.Net.Interfaces.SubClients;
 using CommandLine;
-using Magicodes.ExporterAndImporter.Core;
 using Magicodes.ExporterAndImporter.Csv;
 using System;
 using System.Collections.Generic;
@@ -29,13 +29,20 @@ namespace Crawler
 
         static bool CheckOptions(Options opts)
         {
+            opts.Market ??= "Spot";
             opts.StartTime ??= DateTime.Now.AddYears(-4);
             opts.ExportPath ??= Directory.GetCurrentDirectory();
 
             if (!Directory.Exists(opts.ExportPath))
                 Directory.CreateDirectory(opts.ExportPath);
 
+            if (!(opts.Market.ToLower() == "Spot".ToLower() ||
+                opts.Market.ToLower() == "FuturesCoin".ToLower() ||
+                opts.Market.ToLower() == "FuturesUsdt".ToLower()))
+                return false;
+
             Console.WriteLine($"Symbol: {opts.Symbol}");
+            Console.WriteLine($"Market: {opts.Market}");
             Console.WriteLine($"Start time: {opts.StartTime}");
             Console.WriteLine($"End time: {opts.EndTime}");
             Console.WriteLine($"Export path: {opts.ExportPath}");
@@ -47,12 +54,13 @@ namespace Crawler
         {
             using BinanceClient client = new();
             List<BinanceKline> kLines = new();
+            IBinanceClientMarket market = GetMarket(opts, client);
 
             while (opts.StartTime < GetEndTime(opts))
             {
                 DateTime endTime = opts.StartTime.Value.AddHours(12);
 
-                var klines = await client.Spot.Market.GetKlinesAsync(opts.Symbol, KlineInterval.OneMinute, opts.StartTime, endTime, 1000);
+                var klines = await market.GetKlinesAsync(opts.Symbol, KlineInterval.OneMinute, opts.StartTime, endTime, 1000);
                 if (klines != null && klines.Success)
                 {
                     kLines.AddRange(klines.Data.OrderBy(item => item.CloseTime).Select(item =>
@@ -74,7 +82,7 @@ namespace Crawler
                     Console.WriteLine($"{opts.StartTime}: {klines.Data.Count()}");
                 }
 
-                await Task.Delay(10000);
+                await Task.Delay(3000);
 
                 opts.StartTime = endTime;
             }
@@ -84,14 +92,16 @@ namespace Crawler
             return kLines;
         }
 
+        static IBinanceClientMarket GetMarket(Options opts, BinanceClient client)
+            => (opts.Market.ToLower()) switch
+                {
+                    "futurescoin" => client.FuturesCoin.Market,
+                    "futuresusdt" => client.FuturesUsdt.Market,
+                    _ => client.Spot.Market
+                };
+
         static async Task Export(Options opts, ICollection<BinanceKline> klines)
-        {
-            IExporter exporter = new CsvExporter();
-
-            var result = await exporter.Export($"./{opts.Symbol}.csv", klines);
-
-            Console.WriteLine("Export done.");
-        }
+            => await new CsvExporter().Export($"./{opts.Symbol}-{opts.Market}.csv", klines);
 
         static DateTime GetEndTime(Options opts)
             => opts.EndTime == null ? DateTime.Now : opts.EndTime.Value;
@@ -101,8 +111,10 @@ namespace Crawler
     {
         [Option('s', "symbol", Required = true, HelpText = "BTCUSDT")]
         public string Symbol { get; set; }
-        [Option('S', "start-time", Required = false, HelpText = "20/01/2020")]
 #nullable enable
+        [Option('m', "market", Required = false, HelpText = "Spot FuturesCoin FuturesUsdt")]
+        public string? Market { get; set; }
+        [Option('S', "start-time", Required = false, HelpText = "20/01/2020")]
         public DateTime? StartTime { get; set; }
         [Option('E', "end-time", Required = false, HelpText = "20/02/2020")]
         public DateTime? EndTime { get; set; }

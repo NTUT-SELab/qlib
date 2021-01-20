@@ -35,3 +35,4 @@ tags
 
 .pytest_cache/
 .vscode/
+.vs/
