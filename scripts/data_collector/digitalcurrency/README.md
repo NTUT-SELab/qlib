@@ -11,6 +11,7 @@ pip install -r requirements.txt
 ### Download Data
 ```
 -s, --symbol        Required. BTCUSDT
+-m, --market                  Spot FuturesCoin FuturesUsdt
 -S, --start-time              20/01/2020
 -E, --end-time                20/02/2020
 -o, --output                  csv output path
