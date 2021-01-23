@@ -28,7 +28,7 @@ python collector.py collector_data --source_dir ~/.qlib/digital_currency_data/so
 ### Sort Data
 
 ```bash
-python collector.py sort_data --source_dir ~/.qlib/digital_currency_data/ --sorted_source_dir  ~/.qlib/digital_currency_data/sorted_source source --interval 30m
+python collector.py sort_data --source_dir ~/.qlib/digital_currency_data/source --sorted_source_dir  ~/.qlib/digital_currency_data/sorted_source source --interval 30m
 ```
 
 ### Normalize Data
@@ -40,8 +40,9 @@ python collector.py normalize_data --sorted_source_dir  ~/.qlib/digital_currency
 ### DumpBinData
 
 ```bash
-python ../../dump_bin.py dump_all --csv_path ~/.qlib/digital_currency_data/normalize --qlib_dir ~/.qlib/qlib_data/my_data --freq 30m --include_fields open,close,high,low,volume,factor
-# all feature [open,high,low,close,volume,quotevolume,takecount,takebuyvolume,takebuyquotevolume,factor]
+python ../../dump_bin.py dump_all --csv_path ~/.qlib/digital_currency_data/normalize --qlib_dir ~/.qlib/qlib_data/my_data --freq 30m --include_fields open,high,low,close,volume,money,factor,change,tradecount,takerbuyvolume,takerbuyquotevolume
+
+# all feature open,high,low,close,volume,money,factor,change,tradecount,takerbuyvolume,takerbuyquotevolume
 ```
 
 ### Help

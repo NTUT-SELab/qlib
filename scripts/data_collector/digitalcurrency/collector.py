@@ -14,7 +14,7 @@ CUR_DIR = Path(__file__).resolve().parent
 
 
 class BinanceCollector:
-    COLUMNS = ["open", "high", "low", "close", "volume", "closetime", "quotevolume", "takecount", "takebuyvolume", "takebuyquotevolume"]
+    COLUMNS = ["open", "high", "low", "close", "volume", "money", "factor", "change", "tradecount", "takerbuyvolume", "takerbuyquotevolume"]
     """
 
     Parameters
@@ -48,20 +48,23 @@ class BinanceCollector:
         def _sort_data(source_path: Path):
             columns = copy.deepcopy(self.COLUMNS)
             df = pd.read_csv(source_path)
-            df.columns = ["date"] + columns
-            del df['closetime']
+            df.columns = ["stock_code", "date"] + columns
             df.set_index("date", inplace=True)
             df.index = pd.to_datetime(df.index)
+            print('day')
             df = df.groupby(pd.Grouper(freq=group_interval.get(self._interval.lower(), '30T'))).agg({
+                'stock_code': 'first',
                 'open': 'first',
                 'high': 'max',
                 'low': 'min',
                 'close': 'last',
                 'volume': 'sum',
-                'quotevolume': 'sum',
-                'takecount': 'sum',
-                'takebuyvolume': 'sum',
-                'takebuyquotevolume': 'sum'
+                'money': 'sum',
+                'factor': 'mean',
+                'change': 'sum',
+                'tradecount': 'sum',
+                'takerbuyvolume': 'sum',
+                'takerbuyquotevolume': 'sum'
             })
             df.to_csv(self._target_dir.joinpath(source_path.name))
 
@@ -76,18 +79,15 @@ class BinanceCollector:
 
         def _normalize(source_path: Path):
             columns = copy.deepcopy(self.COLUMNS)
-            columns.remove('closetime')
             df = pd.read_csv(source_path)
             df.set_index("date", inplace=True)
             df.index = pd.to_datetime(df.index)
             df = df[~df.index.duplicated(keep="first")]
             df.sort_index(inplace=True)
             df.loc[(df["volume"] <= 0) | np.isnan(df["volume"]), set(df.columns)] = np.nan
-            df.loc[:, 'factor'] = pd.Series(np.ones(df.index.size), index=df.index)
-            columns += ['factor']
             df.loc[(df["volume"] <= 0) | np.isnan(df["volume"]), columns] = np.nan
             df.index.names = ['date']
-            df.loc[:, columns].to_csv(self._target_dir.joinpath(source_path.name))
+            df.loc[:, columns + ['stock_code']].to_csv(self._target_dir.joinpath(source_path.name))
 
         with ThreadPoolExecutor(max_workers=self._max_workers) as worker:
             file_list = list(self._source_dir.glob("*.csv"))
@@ -101,17 +101,15 @@ class BinanceCollector:
 
         def _adj(file_path: Path):
             df = pd.read_csv(file_path)
-            df = df.loc[:, [
-                "date", "open", "high", "low", "close", "volume", "quotevolume", "takecount", "takebuyvolume", "takebuyquotevolume", "factor"
-            ]]
+            df = df.loc[:, ['date'] + self.COLUMNS + ['stock_code']]
             df.sort_values("date", inplace=True)
             df = df.set_index("date")
             df = df.loc[df.first_valid_index():]
             _close = df["close"].iloc[0]
             for _col in df.columns:
-                if _col == "volume" or _col == "takebuyvolume":
+                if _col == "volume" or _col == "takerbuyvolume":
                     pass
-                elif _col != "volume":
+                elif _col not in ["stock_code"]:
                     df[_col] = df[_col] / _close
                 else:
                     pass
