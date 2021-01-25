@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Crawler
 {
-    class Program
+    static class Program
     {
         static async Task Main(string[] args)
         {
@@ -22,8 +22,8 @@ namespace Crawler
         {
             if (CheckOptions(opts))
             {
-                ICollection<BinanceKline> klines = await GetKlinesAsync(opts);
-                await Export(opts, klines);
+                List<BinanceKline> klines = await GetKlinesAsync(opts) as List<BinanceKline>;
+                await Export(opts, klines.ToQlibKlines(opts));
             }
         }
 
@@ -50,7 +50,7 @@ namespace Crawler
             return true;
         }
 
-        static async Task<ICollection<BinanceKline>> GetKlinesAsync(Options opts)
+        static async Task<IEnumerable<BinanceKline>> GetKlinesAsync(Options opts)
         {
             using BinanceClient client = new();
             List<BinanceKline> kLines = new();
@@ -100,11 +100,41 @@ namespace Crawler
                     _ => client.Spot.Market
                 };
 
-        static async Task Export(Options opts, ICollection<BinanceKline> klines)
-            => await new CsvExporter().Export($"./{opts.Symbol}-{opts.Market}.csv", klines);
+        static async Task Export(Options opts, ICollection<QlibKline> klines)
+            => await new CsvExporter().Export($"./{opts.StockCode}.csv", klines);
 
         static DateTime GetEndTime(Options opts)
             => opts.EndTime == null ? DateTime.Now : opts.EndTime.Value;
+
+        static ICollection<QlibKline> ToQlibKlines (this List<BinanceKline> klines, Options opts)
+        {
+            QlibKline[] qlibKlines = new QlibKline[klines.Count];
+
+            Parallel.ForEach(klines, (kline, state, index) =>
+            {
+                qlibKlines[index] = index == 0 ? kline.ToQlibKline(opts, isFirst: true) : kline.ToQlibKline(opts, klines[Convert.ToInt32(index) - 1].Close);
+            });
+
+            return qlibKlines;
+        }
+
+        static QlibKline ToQlibKline(this BinanceKline kline, Options opts, decimal LastClose = default, bool isFirst = false)
+            => new QlibKline
+            {
+                StockCode = opts.StockCode,
+                Date = kline.OpenTime,
+                Open = kline.Open,
+                Close = kline.Close,
+                High = kline.High,
+                Low = kline.Low,
+                Volume = kline.BaseVolume,
+                Money = kline.QuoteVolume,
+                Factor = 1,
+                TradeCount = kline.TradeCount,
+                TakerBuyBaseVolume = kline.TakerBuyBaseVolume,
+                TakerBuyQuoteVolume = kline.TakerBuyQuoteVolume,
+                Change = isFirst ? 0 : kline.Close - LastClose
+            };
     }
 
     public class Options
@@ -121,5 +151,6 @@ namespace Crawler
         [Option('o', "output", Required = false, HelpText = "歷史資料輸出路徑")]
         public string? ExportPath { get; set; }
 #nullable disable
+        public string StockCode { get { return $"{Symbol}-{Market}"; } }
     }
 }
