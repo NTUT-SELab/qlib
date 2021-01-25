@@ -44,7 +44,7 @@ namespace Crawler
         [ExporterHeader(DisplayName = "stock_code")]
         public string StockCode { get; set; }
 
-        [ExporterHeader(DisplayName = "date")]
+        [ExporterHeader(DisplayName = "date", Format = "yyyy-MM-dd HH:mm:ss")]
         public DateTime Date { get; set; }
 
         [ExporterHeader(DisplayName = "open")]
