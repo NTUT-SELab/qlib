@@ -11,7 +11,7 @@ NAME = "pyqlib"
 DESCRIPTION = "A Quantitative-research Platform"
 REQUIRES_PYTHON = ">=3.5.0"
 
-VERSION = "0.6.1.99"
+VERSION = "0.6.3"
 
 # Detect Cython
 try:
@@ -30,7 +30,7 @@ if not _CYTHON_INSTALLED:
 # What packages are required for this module to be executed?
 # `estimator` may depend on other packages. In order to reduce dependencies, it is not written here.
 REQUIRED = [
-    "numpy>=1.12.0",
+    "numpy>=1.12.0,<=1.19.5",
     "pandas>=0.25.1",
     "scipy>=1.0.0",
     "requests>=2.18.0",
