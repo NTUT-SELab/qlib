@@ -51,7 +51,6 @@ class BinanceCollector:
             df.columns = ["stock_code", "date"] + columns
             df.set_index("date", inplace=True)
             df.index = pd.to_datetime(df.index)
-            print('day')
             df = df.groupby(pd.Grouper(freq=group_interval.get(self._interval.lower(), '30T'))).agg({
                 'stock_code': 'first',
                 'open': 'first',
