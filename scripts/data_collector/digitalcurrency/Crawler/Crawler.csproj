@@ -6,9 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Binance.Net" Version="6.6.3" />
+    <PackageReference Include="Binance.Net" Version="6.9.1" />
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
-    <PackageReference Include="Magicodes.IE.Csv" Version="2.5.1.4" />
+    <PackageReference Include="Magicodes.IE.Csv" Version="2.5.1.7" />
+    <PackageReference Include="ShellProgressBar" Version="5.1.0" />
   </ItemGroup>
 
 </Project>
