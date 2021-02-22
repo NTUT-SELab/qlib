@@ -32,18 +32,19 @@ namespace Crawler
             };
             layer2BarOptions = new()
             {
-                DenseProgressBar = true,
                 ProgressCharacter = '─',
                 CollapseWhenFinished = false,
+                ProgressBarOnBottom = true,
+                BackgroundColor = ConsoleColor.DarkGray
             };
             layer3BarOptions = new()
             {
-                DenseProgressBar = true,
                 CollapseWhenFinished = true,
+                ProgressBarOnBottom = true,
                 ProgressCharacter = '─',
                 ForegroundColor = ConsoleColor.Cyan,
                 ForegroundColorDone = ConsoleColor.DarkGreen,
-                BackgroundColor = ConsoleColor.DarkGray,
+                BackgroundColor = ConsoleColor.DarkGray
             };
 
             await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(RunAsync);
@@ -57,7 +58,7 @@ namespace Crawler
             
             if (opts.Symbol != null)
             {
-                using var pbar = new ProgressBar(1000, $"加密貨幣爬蟲-{opts.Symbol}", layer1BarOptions);
+                using var pbar = new ProgressBar(1000, $"Binance-{opts.Symbol}", layer1BarOptions);
                 IProgress<float> progress = pbar.AsProgress<float>();
                 List<BinanceKline> klines = await GetKlinesAsync(opts.Symbol, progress) as List<BinanceKline>;
                 await Export(klines.ToQlibKlines(opts.Symbol), opts.Symbol);
@@ -65,15 +66,15 @@ namespace Crawler
             else
             {
                 IEnumerable<IBinance24HPrice> prices = await Get24HPricesAsync();
-                if (opts.TradingChip != null)
+                if (opts.PrincipalCurrency != null)
                 {
-                    IEnumerable<string> symbols = GetCrawerSymbols(prices, opts.TradingChip);
-                    using var pbar = new ProgressBar(1000, $"加密貨幣爬蟲-{opts.TradingChip}", layer1BarOptions);
+                    IEnumerable<string> symbols = GetCrawerSymbols(prices, opts.PrincipalCurrency);
+                    using var pbar = new ProgressBar(symbols.Count(), $"Binance-{opts.PrincipalCurrency}", layer1BarOptions);
                     await RunCrawerAsync(symbols, pbar);
                 }
                 else
                 {
-                    using var pbar = new ProgressBar(3, "加密貨幣爬蟲", layer1BarOptions);
+                    using var pbar = new ProgressBar(3, "Binance", layer1BarOptions);
 
                     IEnumerable<string> usdtSymbols = GetCrawerSymbols(prices, "USDT");
                     IEnumerable<string> btcSymbols = GetCrawerSymbols(prices, "BTC");
@@ -107,12 +108,12 @@ namespace Crawler
 
             if (opts.Symbol is not null)
                 Console.WriteLine($"Symbol: {opts.Symbol}");
-            else if (opts.TradingChip is not null && opts.ChangeRank > 0)
-                Console.WriteLine($"Top {opts.ChangeRank} */{opts.TradingChip}");
-            else if (opts.TradingChip is not null)
-                Console.WriteLine($"All */{opts.TradingChip}");
-            else if (opts.ChangeRank > 0)
-                Console.WriteLine($"Top {opts.ChangeRank} */USDT */BTC */ETH");
+            else if (opts.PrincipalCurrency is not null && opts.VolumeRank > 0)
+                Console.WriteLine($"Top {opts.VolumeRank} */{opts.PrincipalCurrency}");
+            else if (opts.PrincipalCurrency is not null)
+                Console.WriteLine($"All */{opts.PrincipalCurrency}");
+            else if (opts.VolumeRank > 0)
+                Console.WriteLine($"Top {opts.VolumeRank} */USDT */BTC */ETH");
             else
                 Console.WriteLine($"All */USDT */BTC */ETH");
             Console.WriteLine($"Market: {opts.Market}");
@@ -127,19 +128,20 @@ namespace Crawler
         {
             Regex pattern = new Regex(@$"\S+{tradingChip}+$", RegexOptions.IgnoreCase);
             var maskPrices = prices.Where(item => pattern.IsMatch(item.Symbol));
-            if (opts.ChangeRank > 0)
-                return maskPrices.OrderByDescending(item => item.BaseVolume).Take((int)opts.ChangeRank).Select(item => item.Symbol);
+            if (opts.VolumeRank > 0)
+                return maskPrices.OrderByDescending(item => item.QuoteVolume).Take((int)opts.VolumeRank).Select(item => item.Symbol);
             return maskPrices.Select(item => item.Symbol);
         }
 
         static async Task RunCrawerAsync(IEnumerable<string> symbols, IProgressBar progressBar)
         {
+            string barMessage = progressBar.Message;
             foreach (var item in symbols.Select((value, index) => new { value, index }))
             {
                 using var symbolBar = progressBar.Spawn(1000, item.value, layer3BarOptions);
                 List<BinanceKline> klines = await GetKlinesAsync(item.value, symbolBar.AsProgress<float>()) as List<BinanceKline>;
                 await Export(klines.ToQlibKlines(item.value), item.value);
-                progressBar.Tick($"Finished {item.value} of {symbols.Count()}: {item.value}");
+                progressBar.Tick($"Finished {item.index + 1} of {symbols.Count()}: {barMessage}");
             }
         }
 
@@ -252,8 +254,8 @@ namespace Crawler
 #nullable enable
         [Option('s', "symbol", Required = false, HelpText = "BTCUSDT")]
         public string? Symbol { get; set; }
-        [Option('t', "trading-chip", Required = false, HelpText = "USDT BTC ETH")]
-        public string? TradingChip { get; set; }
+        [Option('p', "principal-currency", Required = false, HelpText = "本金貨幣: USDT BTC ETH")]
+        public string? PrincipalCurrency { get; set; }
         [Option('m', "market", Required = false, HelpText = "Spot FuturesCoin FuturesUsdt")]
         public string? Market { get; set; }
         [Option('S', "start-time", Required = false, HelpText = "20/01/2020")]
@@ -263,7 +265,7 @@ namespace Crawler
         [Option('o', "output", Required = false, HelpText = "歷史資料輸出路徑")]
         public string? ExportPath { get; set; }
 #nullable disable
-        [Option('c', "change-rank", Required = false, HelpText = "歷史資料輸出路徑", Default = 0)]
-        public uint ChangeRank { get; set; }
+        [Option('v', "volume-rank", Required = false, HelpText = "交易量前 N 名", Default = 0U)]
+        public uint VolumeRank { get; set; }
     }
 }
