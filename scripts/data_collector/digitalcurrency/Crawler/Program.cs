@@ -157,25 +157,29 @@ namespace Crawler
             {
                 DateTime endTime = startTime.AddHours(12);
 
-                var klines = await market.GetKlinesAsync(symbol, KlineInterval.OneMinute, startTime, endTime, 1000);
-                if (klines != null && klines.Success)
+                try
                 {
-                    kLines.AddRange(klines.Data.OrderBy(item => item.CloseTime).Select(item =>
-                        new BinanceKline
-                        {
-                            BaseVolume = item.BaseVolume,
-                            Close = item.Close,
-                            CloseTime = item.CloseTime,
-                            High = item.High,
-                            Low = item.Low,
-                            Open = item.Open,
-                            OpenTime = item.OpenTime,
-                            QuoteVolume = item.QuoteVolume,
-                            TakerBuyBaseVolume = item.TakerBuyBaseVolume,
-                            TakerBuyQuoteVolume = item.TakerBuyQuoteVolume,
-                            TradeCount = item.TradeCount
-                        }));
+                    var klines = await market.GetKlinesAsync(symbol, KlineInterval.OneMinute, startTime, endTime, 1000);
+                    if (klines != null && klines.Success)
+                    {
+                        kLines.AddRange(klines.Data.OrderBy(item => item.CloseTime).Select(item =>
+                            new BinanceKline
+                            {
+                                BaseVolume = item.BaseVolume,
+                                Close = item.Close,
+                                CloseTime = item.CloseTime,
+                                High = item.High,
+                                Low = item.Low,
+                                Open = item.Open,
+                                OpenTime = item.OpenTime,
+                                QuoteVolume = item.QuoteVolume,
+                                TakerBuyBaseVolume = item.TakerBuyBaseVolume,
+                                TakerBuyQuoteVolume = item.TakerBuyQuoteVolume,
+                                TradeCount = item.TradeCount
+                            }));
+                    }
                 }
+                catch{ }
 
                 await Task.Delay(3000);
 
