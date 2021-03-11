@@ -64,7 +64,7 @@ def np_ffill(arr: np.array):
     arr : np.array
         Input numpy 1D array
     """
-    mask = np.isnan(arr.astype(np.float))  # np.isnan only works on np.float
+    mask = np.isnan(arr.astype(float))  # np.isnan only works on np.float
     # get fill index
     idx = np.where(~mask, np.arange(mask.shape[0]), 0)
     np.maximum.accumulate(idx, out=idx)
@@ -128,10 +128,10 @@ def parse_config(config):
     # Check whether config is file
     if os.path.exists(config):
         with open(config, "r") as f:
-            return yaml.load(f)
+            return yaml.safe_load(f)
     # Check whether the str can be parsed
     try:
-        return yaml.load(config)
+        return yaml.safe_load(config)
     except BaseException:
         raise ValueError("cannot parse config!")
 
@@ -721,6 +721,9 @@ class Wrapper:
 
     def register(self, provider):
         self._provider = provider
+
+    def __repr__(self):
+        return "{name}(provider={provider})".format(name=self.__class__.__name__, provider=self._provider)
 
     def __getattr__(self, key):
         if self._provider is None:
