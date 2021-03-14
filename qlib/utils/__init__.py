@@ -473,7 +473,7 @@ def is_tradable_date(cur_date):
     return str(cur_date.date()) == str(D.calendar(start_time=cur_date, future=True)[0].date())
 
 
-def get_date_range(trading_date, left_shift=0, right_shift=0, future=False):
+def get_date_range(trading_date, left_shift=0, right_shift=0, freq="day", future=False):
     """get trading date range by shift
 
     Parameters
@@ -487,14 +487,14 @@ def get_date_range(trading_date, left_shift=0, right_shift=0, future=False):
 
     from ..data import D
 
-    start = get_date_by_shift(trading_date, left_shift, future=future)
+    start = get_date_by_shift(trading_date, left_shift, freq=freq, future=future)
     end = get_date_by_shift(trading_date, right_shift, future=future)
 
     calendar = D.calendar(start, end, future=future)
     return calendar
 
 
-def get_date_by_shift(trading_date, shift, future=False, clip_shift=True):
+def get_date_by_shift(trading_date, shift, freq="day", future=False, clip_shift=True):
     """get trading date with shift bias wil cur_date
         e.g. : shift == 1,  return next trading date
                shift == -1, return previous trading date
@@ -507,7 +507,7 @@ def get_date_by_shift(trading_date, shift, future=False, clip_shift=True):
     """
     from qlib.data import D
 
-    cal = D.calendar(future=future)
+    cal = D.calendar(freq=freq, future=future)
     if pd.to_datetime(trading_date) not in list(cal):
         raise ValueError("{} is not trading day!".format(str(trading_date)))
     _index = bisect.bisect_left(cal, trading_date)

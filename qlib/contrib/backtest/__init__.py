@@ -106,6 +106,7 @@ def get_exchange(
     deal_price=None,
     extract_codes=False,
     shift=1,
+    freq="day"
 ):
     """get_exchange
 
@@ -155,7 +156,7 @@ def get_exchange(
             codes = "all"  # TODO: We must ensure that 'all.txt' includes all the stocks
 
         dates = sorted(pred.index.get_level_values("datetime").unique())
-        dates = np.append(dates, get_date_range(dates[-1], left_shift=1, right_shift=shift))
+        dates = np.append(dates, get_date_range(dates[-1], left_shift=1, right_shift=shift, freq=freq))
 
         exchange = Exchange(
             trade_dates=dates,
