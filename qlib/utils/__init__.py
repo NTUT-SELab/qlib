@@ -488,9 +488,9 @@ def get_date_range(trading_date, left_shift=0, right_shift=0, freq="day", future
     from ..data import D
 
     start = get_date_by_shift(trading_date, left_shift, freq=freq, future=future)
-    end = get_date_by_shift(trading_date, right_shift, future=future)
+    end = get_date_by_shift(trading_date, right_shift, freq=freq, future=future)
 
-    calendar = D.calendar(start, end, future=future)
+    calendar = D.calendar(start, end, freq=freq, future=future)
     return calendar
 
 

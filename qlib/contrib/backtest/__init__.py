@@ -168,6 +168,7 @@ def get_exchange(
             close_cost=close_cost,
             min_cost=min_cost,
             trade_unit=trade_unit,
+            freq=freq,
         )
     return exchange
 
@@ -306,6 +307,8 @@ def backtest(pred, account=1e9, shift=1, benchmark="SH000905", verbose=True, ret
     # init executor:
     executor = get_executor(executor=kwargs.get("executor"), trade_exchange=trade_exchange, verbose=verbose)
 
+    
+
     # run backtest
     report_dict = backtest_func(
         pred=pred,
@@ -317,6 +320,7 @@ def backtest(pred, account=1e9, shift=1, benchmark="SH000905", verbose=True, ret
         account=account,
         benchmark=benchmark,
         return_order=return_order,
+        freq=kwargs.get("freq") if kwargs.get("freq") is not None else "day",
     )
     # for  compatibility of the old API. return the dict positions
 
