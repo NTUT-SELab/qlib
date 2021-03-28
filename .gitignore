@@ -37,3 +37,7 @@ tags
 .pytest_cache/
 .vscode/
 .vs/
+
+*.swp
+
+./pretrain
