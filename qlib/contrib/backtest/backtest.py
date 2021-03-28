@@ -14,7 +14,7 @@ from ...data.dataset.utils import get_level_index
 LOG = get_module_logger("backtest")
 
 
-def backtest(pred, strategy, executor, trade_exchange, shift, verbose, account, benchmark, return_order):
+def backtest(pred, strategy, executor, trade_exchange, shift, verbose, account, benchmark, return_order, freq='day'):
     """Parameters
     ----------
     pred : pandas.DataFrame
@@ -52,7 +52,7 @@ def backtest(pred, strategy, executor, trade_exchange, shift, verbose, account, 
 
     trade_account = Account(init_cash=account)
     _pred_dates = pred.index.get_level_values(level="datetime")
-    predict_dates = D.calendar(start_time=_pred_dates.min(), end_time=_pred_dates.max())
+    predict_dates = D.calendar(start_time=_pred_dates.min(), end_time=_pred_dates.max(), freq=freq)
     if isinstance(benchmark, pd.Series):
         bench = benchmark
     else:
@@ -61,14 +61,15 @@ def backtest(pred, strategy, executor, trade_exchange, shift, verbose, account, 
             _codes,
             ["$close/Ref($close,1)-1"],
             predict_dates[0],
-            get_date_by_shift(predict_dates[-1], shift=shift),
+            get_date_by_shift(predict_dates[-1], shift=shift, freq=freq),
+            freq=freq,
             disk_cache=1,
         )
         if len(_temp_result) == 0:
             raise ValueError(f"The benchmark {_codes} does not exist. Please provide the right benchmark")
         bench = _temp_result.groupby(level="datetime")[_temp_result.columns.tolist()[0]].mean()
 
-    trade_dates = np.append(predict_dates[shift:], get_date_range(predict_dates[-1], left_shift=1, right_shift=shift))
+    trade_dates = np.append(predict_dates[shift:], get_date_range(predict_dates[-1], left_shift=1, right_shift=shift, freq=freq))
     if return_order:
         multi_order_list = []
     # trading apart

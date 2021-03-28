@@ -4,7 +4,7 @@ __pycache__/
 *.pyc
 *.pyd
 *.so
-*.ipynb
+# *.ipynb
 .ipynb_checkpoints
 _build
 bin/

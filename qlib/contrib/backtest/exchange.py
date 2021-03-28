@@ -27,6 +27,7 @@ class Exchange:
         trade_unit=None,
         min_cost=5,
         extra_quote=None,
+        freq="day",
     ):
         """__init__
 
@@ -100,12 +101,12 @@ class Exchange:
             start_date, end_date = None, None
 
         self.extra_quote = extra_quote
-        self.set_quote(codes, start_date, end_date)
+        self.set_quote(codes, start_date, end_date, freq)
 
-    def set_quote(self, codes, start_date, end_date):
+    def set_quote(self, codes, start_date, end_date, freq="day"):
         if len(codes) == 0:
             codes = D.instruments()
-        self.quote = D.features(codes, self.all_fields, start_date, end_date, disk_cache=True).dropna(subset=["$close"])
+        self.quote = D.features(codes, self.all_fields, start_date, end_date, freq, disk_cache=True).dropna(subset=["$close"])
         self.quote.columns = self.all_fields
 
         if self.quote[self.deal_price].isna().any():

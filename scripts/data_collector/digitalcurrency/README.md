@@ -10,14 +10,26 @@ pip install -r requirements.txt
 
 ### Download Data
 ```
--s, --symbol        Required. BTCUSDT
--m, --market                  Spot FuturesCoin FuturesUsdt
--S, --start-time              20/01/2020
--E, --end-time                20/02/2020
--o, --output                  csv output path
+-s, --symbol                BTCUSDT
+
+-p, --principal-currency    本金貨幣: USDT BTC ETH
+
+-m, --market                Spot FuturesCoin FuturesUsdt
+
+-S, --start-time            20/01/2020
+
+-E, --end-time              20/02/2020
+
+-o, --output                歷史資料輸出路徑
+
+-v, --volume-rank           (Default: 0) 交易量前 N 名
+
+--help                      Display this help screen.
+
+--version                   Display version information.
 ```
 ```
-dotnet run -p .\Crawler\Crawler.csproj -- -s BTCUSDT -S 01/16/2021 -E 01/17/2021 -o ~/.qlib/digital_currency_data/source
+dotnet run -p .\Crawler\Crawler.csproj -- -S 01/16/2021 -E 01/17/2021 -o ~/.qlib/digital_currency_data/source
 ```
 
 ### Sort data and Normalize data
