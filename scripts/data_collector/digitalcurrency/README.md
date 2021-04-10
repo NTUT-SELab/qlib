@@ -64,6 +64,6 @@ pythono collector.py collector_data --help
 
 ## Parameters
 
-- interval: [1m, 30m, 1h, 3h, 1d], default 30m
+- interval: [1m, 3m, 15m, 30m, 1h, 3h, 1d], default 30m
 - dumpbin
     - freq: "day" or else str ## `day = "%Y-%m-%d"` else `"%Y-%m-%d %H:%M:%S"`
