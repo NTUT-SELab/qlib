@@ -24,7 +24,7 @@ class BinanceCollector:
     target_dir: str or Path
         Directory for normalize data
     interval: str
-        freq, value from [1m, 30m, 1h, 3h, 1d], default 30m
+        freq, value from [1m, 3m, 15m, 30m, 1h, 3h, 1d], default 30m
     max_workers: int
         Concurrent number, default is 16
     """
@@ -43,7 +43,7 @@ class BinanceCollector:
 
     def sort_data(self):
         logger.info(f"Sort data by freq:{self._interval}.....")
-        group_interval = {'1m': 'T', '30m': '30T', '1h': 'H', '3h': '3H', '1d': 'D'}
+        group_interval = {'1m': 'T', '3m': '3T', '15m': '15T', '30m': '30T', '1h': 'H', '3h': '3H', '1d': 'D'}
 
         def _sort_data(source_path: Path):
             columns = copy.deepcopy(self.COLUMNS)
@@ -168,7 +168,7 @@ class Run:
         Parameters
         ----------
         interval: str
-            freq, value from [1m, 30m, 1h, 3h, 1d], default 30m
+            freq, value from [1m, 3m, 15m, 30m, 1h, 3h, 1d], default 30m
         Examples
         ---------
             # get daily data
@@ -196,7 +196,7 @@ class Run:
         Parameters
         ----------
         interval: str
-            freq, value from [1m, 30m, 1h, 3h, 1d], default 30m
+            freq, value from [1m, 3m, 15m, 30m, 1h, 3h, 1d], default 30m
         Examples
         -------
         python collector.py collector_data --source_dir ~/.qlib/digitalcurrency_data/source --interval 30m
