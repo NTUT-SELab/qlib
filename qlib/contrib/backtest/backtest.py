@@ -13,9 +13,9 @@ from ...data.dataset.utils import get_level_index
 
 LOG = get_module_logger("backtest")
 
-
 def backtest(pred, strategy, executor, trade_exchange, shift, verbose, account, benchmark, return_order, freq='day'):
-    """Parameters
+    """
+    Parameters
     ----------
     pred : pandas.DataFrame
         predict should has <datetime, instrument> index and one `score` column
@@ -125,7 +125,9 @@ def backtest(pred, strategy, executor, trade_exchange, shift, verbose, account, 
 
 
 def update_account(trade_account, trade_info, trade_exchange, trade_date):
-    """Update the account and strategy
+    """
+    Update the account and strategy
+
     Parameters
     ----------
     trade_account : Account()
