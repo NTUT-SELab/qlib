@@ -249,7 +249,7 @@ namespace Crawler
                 TradeCount = kline.TradeCount,
                 TakerBuyBaseVolume = kline.TakerBuyBaseVolume,
                 TakerBuyQuoteVolume = kline.TakerBuyQuoteVolume,
-                Change = isFirst ? 0 : kline.Close - LastClose
+                Change = isFirst ? 0 : (kline.Close - LastClose)/LastClose
             };
     }
 
